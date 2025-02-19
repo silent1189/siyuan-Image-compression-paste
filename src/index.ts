@@ -1,12 +1,13 @@
-import { IProtyleOption, Plugin, showMessage } from "siyuan";
+import { Plugin, showMessage } from "siyuan";
 import * as api from "./api";
 import imageCompression from "browser-image-compression";
+import { resolveSoa } from "dns";
 
 export default class PluginSample extends Plugin {
   private Hpath: string;
   private notebookId: string;
   private pageId: string;
-  private compressSuffix: string = "png";
+  private compressSuffix: string = "webp";
 
   async onload(): Promise<void> {
     console.log("插件已加载");
@@ -34,19 +35,24 @@ export default class PluginSample extends Plugin {
 
   async handlePaste(e) {
     const { files, protyle } = e.detail;
-    const filesListSrc = files;
-    files.length = 0;
-    const filesList = [];
-    for (let index = 0; index < filesListSrc.length; index++) {
-      const file = filesListSrc[index];
+    const filesList:any[] = [];
+    if (files?.length === 0) return;
+    for (let index = 0; index < files.length; index++) {
+      let file = files[index];
       const checkNodes = file.type.split("/");
       if (checkNodes[0] !== "image" && this.checkImage(checkNodes[1])) return;
+      if (files?.length > 1) {
+        showMessage("检测到一次有多个文件上传, 请一次上传文件");
+        files.length = 0;
+        return;
+      }
+      //检测图片是否为拖拽插入，是则转换为File对象
       if (file[Symbol.toStringTag] === "DataTransferItem"){
-        showMessage(
-          "检测到有图片通过拖动的方式插图页面，已自动过滤，请将插入方式改为粘贴"
-        );
-        continue;
-     }
+        file = new File([file.getAsFile()], file.getAsFile().name, {
+          type: file.getAsFile().type
+     });
+    }
+    //console.log(file[Symbol.toStringTag].includes("DataTransferItem"));
       if (this.notebookId + this.Hpath + this.pageId === "") {
         //初始化全局变量: 设置上传路径
         this.pageId = protyle.block.id;
@@ -56,11 +62,12 @@ export default class PluginSample extends Plugin {
             "/"
           ) + (await api.getHPathByID(this.pageId));
       }
-      filesList.push(file);
+      filesList.push([protyle.block.id,file]);
     }
-    console.log(filesList);
+    //console.log(filesList);
     //操作图片
-    //this.processingPictures(filesList);
+    this.processingPictures(filesList);
+
     // if (files?.length === 0) return;
     // if (files?.length > 1) {
     //   new Dialog({
@@ -113,25 +120,44 @@ export default class PluginSample extends Plugin {
     const fileList = [];
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
+      //console.log(file);
       //压缩图片
-      const compressedFile = await this.compressImage(file);
+      const compressedFile = await this.compressImage(file[1]);
       if (compressedFile) {
-        fileList.push(
-          new File([compressedFile], `${"image" + file.type}`, {
+        fileList.push([file[0],
+          new File([compressedFile], `${file[1].name.split('.')[0]+'.'+this.compressSuffix}`, {
             type: this.compressSuffix,
           })
-        );
+        ]);
+        //console.log(fileList);
       } else {
-        showMessage(`${file.name}压缩失败, 请检查图片`);
+        showMessage(`${file[1].name}压缩失败, 请检查图片`);
       }
     }
-    console.log(fileList);
-    //this.uploadToSiyuanServer(fileList);
+    //console.log(fileList);
+    this.uploadToSiyuanServer(fileList);
   }
 
   async uploadToSiyuanServer(files: any[]) {
-    const result = await api.upload(this.Hpath, files);
-    console.log(result.succMap);
+    const fileList:any[] = [];
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index][1];
+      fileList.push(file);
+    }
+    const result = await api.upload(this.Hpath, fileList);
+    fileList.length = 0;
+    for (let index = 0; index < files.length; index++) {
+      fileList.push([files[index][0],result.succMap[files[index][1].name]]);
+    }
+    //console.log(files[0][1]); //id
+    //console.log(fileList[1]); //path
+
+    //await api.updateBlock("markdown", `![${files[0][1].name}](${files[0][1]})`, files[0][0]);
+    for (let index = 0; index < files.length; index++) {
+      //console.log(await api.updateBlock("markdown", `![${files[index][1].name}](${fileList[index][1]})`, fileList[index][0]));
+    }
+    //console.log(result.succMap);
+    // console.log(await api.readDir("/data/assets"));
   }
 
   private async remoteAssetsImageFile(assets: IResReadDir): Promise<void> {
@@ -149,7 +175,7 @@ export default class PluginSample extends Plugin {
       maxSizeMB: 0.75,
       maxWidthOrHeight: 1920,
       useWebWorker: true,
-      //fileType: "image/webp", //修改压缩后的后缀格式
+      fileType: "image/"+this.compressSuffix, //修改压缩后的后缀格式
     };
 
     try {
