@@ -24,11 +24,17 @@
 ## **参考**
 
 > [plugin-sample](https://github.com/siyuan-note/plugin-sample)
+> 
 > [plugin-sample-vite-svelte](https://github.com/siyuan-note/plugin-sample-vite-svelte)
+> 
 > [plugin-sample-vite](https://github.com/frostime/plugin-sample-vite)
+> 
 > [插件开发 Quick Start](https://ld246.com/article/1723732790981)
+> 
 > [后端API](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+> 
 > [前端API](https://github.com/siyuan-note/petal/blob/main/siyuan.d.ts)
+> 
 > [siyuan-steve-tools](https://github.com/loonghfut/siyuan-steve-tools)
 
 ## PS
