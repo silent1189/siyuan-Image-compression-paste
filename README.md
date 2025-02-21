@@ -40,3 +40,11 @@
 ## PS
 
 作者是思源笔记插件开发小白，通过几天时间的研究和查找资料才初步有了插件开发的能力，插件想法参考obsidian的[obsidian-image-converter](https://github.com/xRyul/obsidian-image-converter)，如果你觉得这个插件不错也请为我点star，如果有感兴趣的大佬，欢迎参与到插件开发中....
+
+样图示例:
+![image](https://github.com/user-attachments/assets/31342573-58fc-4147-bbdd-79205ba0ff85)
+![image](https://github.com/user-attachments/assets/781b66db-7823-4895-a4ae-4c8cd679d2bf)
+
+
+
+
