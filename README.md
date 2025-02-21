@@ -40,5 +40,3 @@
 ## PS
 
 作者是思源笔记插件开发小白，通过几天时间的研究和查找资料才初步有了插件开发的能力，插件想法参考obsidian的[obsidian-image-converter](https://github.com/xRyul/obsidian-image-converter)，如果你觉得这个插件不错也请为我点star，如果有感兴趣的大佬，欢迎参与到插件开发中....
-
-因为实现思路还没有完善，计划近期会对插入图片时思源客户端的网络请求进行分析，完善实现思路
